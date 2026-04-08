@@ -21,22 +21,32 @@ def log_error(error_message):
     except: return "Rapor tutulamadı."
 
 def self_update():
-    """İnternetteki yeni kodu çeker ve kendi fişini çekip güncellenmiş olarak uyanır."""
+    """İnternetteki yeni kodları çeker ve sistemi güncelleyip yeniden başlatır."""
     try:
-        # ÜSTAD DİKKAT: Buraya kendi GitHub RAW linklerini koyacaksın!
-        tools_url = "BURAYA_GITHUB_TOOLS_RAW_LINKI_GELECEK"
-        brain_url = "BURAYA_GITHUB_BRAIN_RAW_LINKI_GELECEK"
+        # ÜSTAD, KOPYALADIĞIN 4 RAW LİNKİNİ BURAYA YAPIŞTIR:
+        tools_url = "https://raw.githubusercontent.com/enescelalyavuz5-crypto/Victus/refs/heads/main/tools.py"
+        brain_url = "https://raw.githubusercontent.com/enescelalyavuz5-crypto/Victus/refs/heads/main/brain.py"
+        main_url  = "https://raw.githubusercontent.com/enescelalyavuz5-crypto/Victus/refs/heads/main/main.py"
+        audio_url = "https://raw.githubusercontent.com/enescelalyavuz5-crypto/Victus/refs/heads/main/audio_manager.py"
 
+        # Dosyaları internetten indir
         yeni_tools = requests.get(tools_url).text
         yeni_brain = requests.get(brain_url).text
+        yeni_main  = requests.get(main_url).text
+        yeni_audio = requests.get(audio_url).text
 
+        # Güvenlik kontrolü (Dosyalar boş gelmediyse)
         if "import" in yeni_tools and "import" in yeni_brain:
+            
+            # Bilgisayardaki eski dosyaların üzerine acımasızca yaz
             with open("tools.py", "w", encoding="utf-8") as f: f.write(yeni_tools)
             with open("brain.py", "w", encoding="utf-8") as f: f.write(yeni_brain)
+            with open("main.py", "w", encoding="utf-8") as f: f.write(yeni_main)
+            with open("audio_manager.py", "w", encoding="utf-8") as f: f.write(yeni_audio)
             
             print("[SİSTEM] Yeni kodlar zihne kazındı. Victus yeniden doğuyor...")
             time.sleep(1)
-            os.execv(sys.executable, ['python'] + sys.argv) # Kendi fişini çekip takar
+            os.execv(sys.executable, ['python'] + sys.argv) # Fişi çekip takar
         else:
             return "İnternetteki dosyalar boş veya hatalı Paşam, güncelleme iptal."
     except Exception as e: return f"Güncelleme hatası: {e}"
