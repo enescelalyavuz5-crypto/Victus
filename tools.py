@@ -56,21 +56,31 @@ def browser_control(action):
     except Exception as e: return f"Hata: {e}"
 
 def find_and_focus_tab(tab_name):
-    """Belirli bir sekmeyi bulana kadar gezer."""
+    """Tarayıcıyı bulur ve sekme ismine göre radarı çalıştırır."""
     minimize_victus()
-    time.sleep(0.5)
     try:
-        active = gw.getActiveWindow()
-        if not active or ("chrome" not in active.title.lower() and "edge" not in active.title.lower()):
-             focus_window("chrome")
-             time.sleep(0.5)
-        for _ in range(30):
-            title = gw.getActiveWindowTitle()
-            if title and tab_name.lower() in title.lower():
-                return f"'{title}' bulundu."
-            keyboard.send("ctrl+tab") 
-            time.sleep(0.3) 
-        return "Sekme bulunamadı."
+        # Chrome veya Edge'i bul ve zorla öne getir
+        browser_found = False
+        for title in gw.getAllTitles():
+            if "google chrome" in title.lower() or "microsoft edge" in title.lower():
+                win = gw.getWindowsWithTitle(title)[0]
+                if win.isMinimized: win.restore()
+                win.activate()
+                browser_found = True
+                break
+        
+        if not browser_found: return "Tarayıcı açık değil Üstad."
+        
+        time.sleep(0.5)
+        for _ in range(30): # 30 sekmeye kadar tara
+            current_title = gw.getActiveWindowTitle()
+            if current_title and tab_name.lower() in current_title.lower():
+                return f"'{tab_name}' sekmesini buldum ve odaklandım Paşam."
+            
+            keyboard.send("ctrl+tab")
+            time.sleep(0.3)
+            
+        return f"'{tab_name}' sekmesini bulamadım."
     except Exception as e: return f"Radar hatası: {e}"
 
 def file_manager(action, path, destination=None):
