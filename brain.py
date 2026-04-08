@@ -17,6 +17,7 @@ memory = [{"role": "system", "content": SYSTEM_PROMPT + hafizayi_yukle() + SUS_T
 
 # BÜTÜN YETENEKLER ŞEMASI (16 ADET)
 tools_schema = [
+    {"type": "function", "function": {"name": "find_and_focus_tab", "description": "Tarayıcıda belirli bir sekmeyi isiminden (Örn: 'Gemini')bulana kadar otomatik gezer.","parameters": {"type": "object", "properties":{"tab_name": {"type": "string"}},"required": ["tab_name"]}}},
     {"type": "function", "function": {"name": "self_update", "description": "İnternetteki yeni kodu indirir ve sistemi güncelleyip yeniden başlatır.", "parameters": {"type": "object", "properties": {}}}},
     {"type": "function", "function": {"name": "log_error", "description": "Karşılaşılan hataları veya eksiklikleri geliştirme raporuna kaydeder.", "parameters": {"type": "object", "properties": {"error_message": {"type": "string"}}, "required": ["error_message"]}}},
     {"type": "function", "function": {"name": "browser_control", "description": "Tarayıcıda yan sekmeye geçer veya sekmeyi kapatır.", "parameters": {"type": "object", "properties": {"action": {"type": "string", "enum": ["next_tab", "prev_tab", "close_tab"]}}, "required": ["action"]}}},
