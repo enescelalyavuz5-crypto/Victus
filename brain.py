@@ -82,6 +82,7 @@ async def think_and_act(user_input):
                 elif f_name == "file_manager": res = file_manager(args["action"], args["path"], args.get("destination"))
                 elif f_name == "software_manager": res = software_manager(args["action"], args["app_name"])
                 elif f_name == "steam_search": res = steam_search(args["query"])
+                elif f_name == "find_and_focus_tab": res = find_and_focus_tab(args["tab_name"])
                 elif f_name == "focus_window": res = focus_window(args["app_name"])
                 elif f_name == "open_app": res = open_app(args["app_name"])
                 elif f_name == "click_on_text": res = click_on_text(args["target_text"])
