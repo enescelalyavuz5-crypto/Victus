@@ -208,6 +208,30 @@ def media_control(action):
 def save_memory(note):
     with open("Victus_Hafiza.txt", "a", encoding="utf-8") as f: f.write(f"- {note}\n")
     return "Hafızaya kazıdım."
+    
+    def find_and_focus_tab(tab_name):
+    """Tarayıcıda sekmeleri tek tek gezip isminden sekme bulur (Radar Sistemi)."""
+    minimize_victus()
+    time.sleep(0.5)
+    try:
+        # Önce Chrome'u veya Edge'i öne çektiğimizden emin olalım
+        active = gw.getActiveWindow()
+        if not active or ("chrome" not in active.title.lower() and "edge" not in active.title.lower()):
+             focus_window("chrome")
+             time.sleep(0.5)
+             
+        # En fazla 30 sekme arar (sonsuz döngüye girmesin diye)
+        for _ in range(30):
+            title = gw.getActiveWindowTitle()
+            if title and tab_name.lower() in title.lower():
+                return f"'{title}' sekmesini buldum ve ekrana getirdim Üstad."
+            
+            keyboard.send("ctrl+tab") # Yan sekmeye geç
+            time.sleep(0.3) # Sekmenin yüklenmesi için saliselik bekleme
+            
+        return f"Tüm sekmeleri gezdim ama '{tab_name}' adında bir sekme bulamadım Paşam."
+    except Exception as e: 
+        return f"Sekme radarı bozuldu: {e}"
 
 def exit_system():
     os._exit(0)
