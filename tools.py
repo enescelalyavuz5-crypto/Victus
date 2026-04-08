@@ -35,7 +35,7 @@ def self_update():
     except Exception as e: return f"Güncelleme hatası: {e}"
 
 def find_and_focus_tab(tab_name):
-    """Agresif Sekme Radarı: Pencere başlıklarından sekmeyi yakalar."""
+    """Agresif Sekme Radarı: Önce pencere listesine bakar, yoksa sekmeleri döner."""
     minimize_victus()
     try:
         # 1. Aşama: Direkt Pencere Başlığı Kontrolü
@@ -46,10 +46,11 @@ def find_and_focus_tab(tab_name):
                 win.activate()
                 return f"'{tab_name}' sekmesini direkt buldum Paşam."
 
-        # 2. Aşama: Tarayıcıyı Odakla ve Sekme Gez
+        # 2. Aşama: Tarayıcıyı Bul ve Sekmeleri Gez
         browser_found = False
+        target_browsers = ["google chrome", "microsoft edge", "opera", "brave"]
         for title in gw.getAllTitles():
-            if any(b in title.lower() for b in ["chrome", "edge", "opera", "brave"]):
+            if any(browser in title.lower() for browser in target_browsers):
                 win = gw.getWindowsWithTitle(title)[0]
                 if win.isMinimized: win.restore()
                 win.activate()
@@ -57,15 +58,15 @@ def find_and_focus_tab(tab_name):
                 break
         
         if not browser_found: return "Tarayıcı açık değil Üstad."
-
+        
         time.sleep(0.5)
         for _ in range(15):
-            current = gw.getActiveWindowTitle()
-            if current and tab_name.lower() in current.lower():
+            current_title = gw.getActiveWindowTitle()
+            if current_title and tab_name.lower() in current_title.lower():
                 return f"'{tab_name}' sekmesini gezerek buldum Paşam."
             keyboard.send("ctrl+tab")
             time.sleep(0.2)
-        return "Sekme bulunamadı."
+        return f"'{tab_name}' sekmesini bulamadım."
     except Exception as e: return f"Radar hatası: {e}"
 
 def browser_control(action):
@@ -79,7 +80,7 @@ def browser_control(action):
     except: return "Tarayıcı kontrol hatası."
 
 def open_app(app_name):
-    """Program, site veya ayarları hatasız açar."""
+    """Uygulama, site veya ayarları hatasız açar."""
     app_lower = app_name.lower()
     if "chrome" in app_lower or "gemini" in app_lower:
         url = "https://gemini.google.com" if "gemini" in app_lower else ""
@@ -91,7 +92,7 @@ def open_app(app_name):
         webbrowser.open(sites[app_lower])
         return f"{app_name} açıldı."
 
-    settings_map = {"ses": "sound", "ekran": "display", "internet": "network", "güncelleme": "windowsupdate"}
+    settings_map = {"ses": "sound", "ekran": "display", "internet": "network", "güncelleme": "windowsupdate", "ayarlar": "home"}
     for key, val in settings_map.items():
         if key in app_lower:
             os.system(f"start ms-settings:{val}")
@@ -116,21 +117,21 @@ def focus_window(app_name):
 def click_on_text(target_text):
     """Ekranda yazı bulur ve tıklar."""
     minimize_victus()
-    time.sleep(0.7)
+    time.sleep(0.8)
     try:
         screenshot = pyautogui.screenshot()
         data = pytesseract.image_to_data(screenshot, output_type=pytesseract.Output.DICT)
         for i, text in enumerate(data['text']):
-            if target_text.lower() in text.lower() and text.strip():
+            if text.strip() and target_text.lower() in text.lower():
                 x = data['left'][i] + data['width'][i]//2
                 y = data['top'][i] + data['height'][i]//2
                 pyautogui.click(x, y)
                 return f"'{target_text}' tıklandı."
-        return "Yazı bulunamadı."
+        return f"'{target_text}' yazısını seçemedim Paşam."
     except: return "OCR Hatası."
 
 def file_manager(action, path, destination=None):
-    """Dosya/klasör işlemlerini halleder."""
+    """Kopyala, taşı veya sil işlerini halleder."""
     try:
         path = os.path.abspath(path)
         if action == "copy" and destination:
@@ -140,19 +141,20 @@ def file_manager(action, path, destination=None):
             return "Kopyalama başarılı."
         elif action == "move" and destination:
             shutil.move(path, os.path.abspath(destination))
-            return "Taşıma tamam."
+            return "Taşıma işlemi tamam."
         elif action == "delete":
             if os.path.isdir(path): shutil.rmtree(path)
             else: os.remove(path)
             return "İmha edildi."
+        return "Geçersiz işlem."
     except Exception as e: return f"Dosya hatası: {e}"
 
 def software_manager(action, app_name):
-    """Winget ile kurulum/kaldırma."""
+    """Winget ile sessiz kurulum/kaldırma."""
     try:
-        cmd = f"winget {action} {app_name} --silent --accept-source-agreements --accept-package-agreements"
+        cmd = f"winget {action} {app_name} --silent --accept-source-agreements --accept-package-agreements --force"
         subprocess.Popen(cmd, shell=True)
-        return f"{app_name} için {action} başlatıldı."
+        return f"{app_name} {action} işlemi arka planda başlatıldı."
     except: return "Winget hatası."
 
 def get_system_info():
@@ -163,7 +165,7 @@ def get_system_info():
         gpus = GPUtil.getGPUs()
         gpu_info = f"{gpus[0].name} ({gpus[0].temperature}°C)" if gpus else "GPU Yok"
         return f"CPU: %{cpu}, RAM: %{ram}, GPU: {gpu_info} Üstad."
-    except: return "Sistem okuma hatası."
+    except: return "Sistem bilgileri okunamadı."
 
 def read_screen():
     """Ekrandaki her şeyi okur."""
@@ -188,14 +190,14 @@ def click_and_type(target_text, input_text):
     res = click_on_text(target_text)
     if "tıklandı" in res:
         time.sleep(0.3); keyboard.write(input_text); keyboard.send("enter")
-        return "Yazıldı."
+        return f"'{target_text}' alanına '{input_text}' yazıldı."
     return res
 
 def steam_search(query):
     """Steam'de oyun arar."""
     minimize_victus()
     os.system(f"start steam://openurl/https://store.steampowered.com/search/?term={query}")
-    return "Steam araması açıldı."
+    return f"Steam'de '{query}' aranıyor."
 
 def system_control(action):
     """Ses kontrolleri."""
@@ -205,10 +207,10 @@ def system_control(action):
     return "Ses ayarlandı."
 
 def media_control(action):
-    """Medya kontrolleri."""
+    """Oynatma kontrolleri."""
     acts = {"play_pause": "play/pause media", "next": "next track", "prev": "previous track"}
     if action in acts: keyboard.send(acts[action]); return "Medya kontrol edildi."
-    return "Komut bulunamadı."
+    return "Bilinmeyen komut."
 
 def save_memory(note):
     """Notları hafızaya kazır."""
